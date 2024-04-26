@@ -1,0 +1,108 @@
+Step 1: Include Headers
+cpp
+Copy code
+#include <iostream>
+#include <omp.h>
+#include <climits>
+using namespace std;
+These lines include necessary header files. iostream is for standard input/output operations, omp.h is for OpenMP parallelization directives,
+ and climits is for defining INT_MAX and INT_MIN.
+
+Step 2: Function Definitions
+2.1. min_reduction Function
+cpp
+Copy code
+void min_reduction(int arr[], int n) {
+    int min_value = INT_MAX; // Initialize to the maximum possible value
+    #pragma omp parallel for reduction(min: min_value)
+    for (int i = 0; i < n; i++) {
+        if (arr[i] < min_value) {
+            min_value = arr[i];
+        }
+    }
+    cout << "Minimum value: " << min_value << endl;
+}
+This function finds the minimum value in the array using OpenMP parallelization with a reduction clause.
+ 
+It initializes min_value to the maximum possible integer value, then iterates through the array in parallel.
+ 
+Each thread independently finds the minimum value within its portion of the array, and the min reduction operation combines these local minimums into a global minimum.
+
+2.2. max_reduction Function
+cpp
+Copy code
+void max_reduction(int arr[], int n) {
+    int max_value = INT_MIN; // Initialize to the minimum possible value
+    #pragma omp parallel for reduction(max: max_value)
+    for (int i = 0; i < n; i++) {
+        if (arr[i] > max_value) {
+            max_value = arr[i];
+        }
+    }
+    cout << "Maximum value: " << max_value << endl;
+}
+Similar to min_reduction, this function finds the maximum value in the array using OpenMP parallelization with a reduction clause. 
+It initializes max_value to the minimum possible integer value and then updates it in parallel loops.
+
+2.3. sum_reduction Function
+cpp
+Copy code
+void sum_reduction(int arr[], int n) {
+    int sum = 0;
+    #pragma omp parallel for reduction(+: sum)
+    for (int i = 0; i < n; i++) {
+        sum += arr[i];
+    }
+    cout << "Sum: " << sum << endl;
+}
+This function calculates the sum of all elements in the array using OpenMP parallelization with a reduction clause. 
+It initializes sum to zero and updates it in parallel loops.
+
+
+2.4. average_reduction Function
+cpp
+Copy code
+void average_reduction(int arr[], int n) {
+    int sum = 0;
+    #pragma omp parallel for reduction(+: sum)
+    for (int i = 0; i < n; i++) {
+        sum += arr[i];
+    }
+    cout << "Average: " << (double)sum / n << endl;
+}
+This function calculates the average of all elements in the array using OpenMP parallelization with a reduction clause.
+ It follows a similar pattern to sum_reduction, but it divides the sum by the total number of elements n to find the average.
+
+Step 3: Main Function
+cpp
+Copy code
+int main() {
+    int *arr, n;
+    cout << "Enter total number of elements: ";
+    cin >> n;
+    arr = new int[n];
+    cout << "Enter elements: ";
+    for (int i = 0; i < n; i++) {
+        cin >> arr[i];
+    }
+    min_reduction(arr, n);
+    max_reduction(arr, n);
+    sum_reduction(arr, n);
+    average_reduction(arr, n);
+    delete[] arr;
+    return 0;
+}
+Input: Asks the user to input the total number of elements and the elements themselves.
+
+Memory Allocation: Dynamically allocates memory for the array arr.
+
+Input Handling: Reads the elements into the array.
+
+Function Calls: Calls the four functions to find the minimum, maximum, sum, and average of the elements in the array.
+
+Memory Deallocation: Frees the dynamically allocated memory using delete[].
+Summary
+
+The program calculates various statistics (minimum, maximum, sum, and average) 
+of an array of integers using OpenMP for parallelization and reduction clauses to perform the calculations efficiently.
+ Each function operates on the array in parallel, leveraging multiple threads to speed up the computations.

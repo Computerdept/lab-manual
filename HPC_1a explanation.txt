@@ -1,0 +1,90 @@
+HPC_1a
+
+#include <iostream>: This line includes the standard input/output stream library, which allows the program to perform input and output operations.
+
+#include <queue>: This line includes the standard queue library, which provides functionality for creating and manipulating queues.
+
+#include <omp.h>: This line includes the OpenMP library, which stands for Open Multi-Processing. It enables parallelism in programs by providing directives and library routines.
+
+struct Node { ... };: This defines a structure named Node, which represents a node in a binary tree. Each node contains an integer data value and pointers to its left and right children.
+Node(int value) : data(value), left(NULL), right(NULL) {}: This is a constructor for the Node structure. It initializes the data member with the provided value and sets the left and right pointers to NULL.
+
+Node* createNode(int value) { ... }: This is a function definition for creating a new node. It takes an integer value as input and returns a pointer to a newly created Node with the given value.
+
+Node* constructTree() {: This line defines the constructTree function, which returns a pointer to a Node. This function is responsible for constructing a binary tree based on user input.
+
+int data;: This line declares an integer variable data to store the value of the root node.
+cout << "Enter root node value (-1 to stop): ";: This line prints a message to prompt the user to enter the value of the root node.
+cin >> data;: This line reads the input value provided by the user for the root node and stores it in the variable data.
+
+if (data == -1) return NULL;: This line checks if the input value for the root node is -1, indicating that the user wants to stop building the tree. If so, it returns NULL, indicating an empty tree.
+
+Node* root = createNode(data);: This line creates a new node with the value provided by the user for the root node using the createNode function. The pointer to this new node is assigned to the variable root
+
+queue<Node*> q;: This line declares a queue q to store pointers to nodes. It will be used to facilitate the construction of the binary tree.
+q.push(root);: This line pushes the pointer to the root node onto the queue to begin the construction process.
+
+while (!q.empty()) {: This line starts a loop that continues until the queue is empty, indicating that all nodes in the current level have been processed.
+
+Node* current = q.front();: This line retrieves the front node from the queue and assigns it to the variable current, representing the node currently being processed.
+q.pop();: This line removes the front node from the queue, effectively dequeuing it.
+
+int leftData, rightData;: These lines declare integer variables leftData and rightData to store the values of the left and right children, respectively.
+cout << "Enter left child value of " << current->data << " (-1 for no left child): ";: This line prints a message prompting the user to enter the value for the left child of the current node.
+cin >> leftData;: This line reads the input value provided by the user for the left child and stores it in the variable leftData
+
+if (leftData != -1) {: This line checks if the input value for the left child is not -1, indicating that the user wants to create a left child for the current node.
+current->left = createNode(leftData);: This line creates a new node with the value provided by the user for the left child using the createNode function. The pointer to this new node is assigned as the left child of the current node.
+q.push(current->left);: This line pushes the pointer to the left child onto the queue, enabling further processing of its children.
+
+cout << "Enter right child value of " << current->data << " (-1 for no right child): ";: This line prints a message prompting the user to enter the value for the right child of the current node.
+cin >> rightData;: This line reads the input value provided by the user for the right child and stores it in the variable rightData.
+
+if (rightData != -1) {: This line checks if the input value for the right child is not -1, indicating that the user wants to create a right child for the current node.
+current->right = createNode(rightData);: This line creates a new node with the value provided by the user for the right child using the createNode function. The pointer to this new node is assigned as the right child of the current node.
+q.push(current->right);: This line pushes the pointer to the right child onto the queue, enabling further processing of its children.
+  
+void parallelBFS(Node* root) {: This line defines the function parallelBFS, which takes a pointer to the root node of a binary tree as its parameter.
+
+if (root == NULL) return;: This line checks if the root node is NULL, indicating an empty tree. If so, the function immediately returns without further processing.
+
+queue<Node*> q;: This line declares a queue q of pointers to nodes. It will be used to perform BFS traversal of the binary tree.
+q.push(root);: This line pushes the root node onto the queue to initiate the BFS traversal.
+
+while (!q.empty()) {: This line starts a loop that continues until the queue is not empty, indicating there are still nodes to be processed in the traversal.
+
+int level_size = q.size();: This line determines the number of nodes at the current level of the tree by getting the size of the queue, which contains all nodes at the current level.
+
+#pragma omp parallel: This pragma starts a parallel region, indicating that the following code block will be executed by multiple threads in parallel.
+#pragma omp for: This pragma distributes the iterations of the subsequent loop across the available threads in the parallel region.
+
+for (int i = 0; i < level_size; ++i) {: This line initiates a loop that iterates over the nodes at the current level of the tree.
+
+Node* current;: This line declares a pointer current to hold the current node being processed.
+#pragma omp critical: This pragma creates a critical section, ensuring that only one thread at a time can execute the enclosed code block. Here, it's used to safely access and modify the queue q.
+current = q.front();: This line retrieves the front node from the queue, indicating the node currently being processed.
+q.pop();: This line removes the front node from the queue, effectively dequeuing it.
+
+cout << current->data << " ";: This line prints the data of the current node to the standard output, effectively displaying the node's value.
+
+                if (current->left != NULL)
+                    #pragma omp critical
+                    q.push(current->left);
+                if (current->right != NULL)
+                    #pragma omp critical
+                    q.push(current->right);
+
+These lines enqueue the left and right children of the current node, if they exist, into the queue q. Each enqueue operation is protected by a critical section to ensure thread safety.
+
+int main() {: This line defines the main function, which serves as the entry point of the program.
+
+Node* root = constructTree();: This line calls the constructTree function to construct a binary tree based on user input. It assigns the pointer to the root node of the constructed tree to the variable root.
+
+if (root == NULL) {: This line checks if the root node of the constructed tree is NULL, indicating that the tree is empty.
+cout << "Empty tree!" << endl;: If the tree is empty, this line prints a message indicating that the tree is empty.
+return 0;: This line exits the program with a return status of 0, indicating successful execution.
+
+cout << "Breadth First Search (BFS): ";: This line prints a message indicating that the BFS traversal of the tree is about to be performed.
+parallelBFS(root);: This line calls the parallelBFS function to perform a parallel Breadth First Search (BFS) traversal of the binary tree starting from the root node root.
+
+

@@ -1,0 +1,117 @@
+HPC2b2:
+
+#include <iostream>: This line includes the input-output stream library, allowing the program to perform input and output operations.
+#include <omp.h>: This line includes the OpenMP library, enabling parallel programming using directives and library routines.
+#include <cstdlib> and #include <ctime>: These lines include the standard library headers for C standard library functions such as rand() and srand(), used for generating random numbers.
+
+void merge(int arr[], int left, int mid, int right): This declares a function named merge, which takes an integer array arr[] and three integer parameters left, mid, and right. These parameters represent the indices defining the subarrays to be merged.
+int n1 = mid - left + 1; and int n2 = right - mid;: These lines calculate the sizes of the two subarrays to be merged.
+
+    // Create temporary arrays
+    int* L = new int[n1];
+    int* R = new int[n2];
+These lines dynamically allocate memory for two temporary arrays L and R of sizes n1 and n2, respectively, to store the elements of the two subarrays.
+
+ for (int i = 0; i < n1; ++i)
+        L[i] = arr[left + i];
+    for (int j = 0; j < n2; ++j)
+        R[j] = arr[mid + 1 + j];
+These loops copy the elements of the original array arr[] into the temporary arrays L[] and R[].
+
+int i = 0, j = 0, k = left;: This line initializes three variables: i, j, and k.
+i represents the current index of the left subarray L[].
+j represents the current index of the right subarray R[].
+k represents the current index of the merged array arr[], starting from left.
+while (i < n1 && j < n2) {: This line starts a while loop that continues as long as both i is less than n1 (the size of the left subarray L[]) and j is less than n2 (the size of the right subarray R[]). This loop ensures that we haven't reached the end of either subarray.
+if (L[i] <= R[j]) {: This line checks if the element at index i in the left subarray L[] is less than or equal to the element at index j in the right subarray R[]. If this condition is true, it means the current element from the left subarray should be placed in the merged array arr[].
+arr[k] = L[i];: If the element from the left subarray is smaller or equal to the element from the right subarray, it is placed in the merged array arr[] at index k.
+++i;: After placing an element from the left subarray into the merged array, i is incremented to move to the next element in the left subarray.
+else {: If the condition in the if statement is false, it means the element from the right subarray is smaller than the element from the left subarray.
+arr[k] = R[j];: In this case, the current element from the right subarray is placed in the merged array arr[] at index k.
+++j;: After placing an element from the right subarray into the merged array, j is incremented to move to the next element in the right subarray.
+++k;: In either case (whether an element from the left or right subarray is placed in the merged array), k is incremented to move to the next position in the merged array.
+
+while (i < n1) {: This line starts a while loop that continues as long as i is less than n1 (the size of the left subarray L[]). This loop handles the case where there are remaining elements in the left subarray L[] that have not been merged into the merged array arr[].
+arr[k] = L[i];: Inside the loop, this line copies the current element from the left subarray L[] at index i into the merged array arr[] at index k. This effectively merges the remaining elements of the left subarray into the merged array.
+++i;: After copying an element from the left subarray into the merged array, i is incremented to move to the next element in the left subarray.
+++k;: After copying an element into the merged array, k is incremented to move to the next position in the merged array.
+
+while (j < n2) {: This line starts a while loop that continues as long as j is less than n2 (the size of the right subarray R[]). This loop handles the case where there are remaining elements in the right subarray R[] that have not been merged into the merged array arr[].
+arr[k] = R[j];: Inside the loop, this line copies the current element from the right subarray R[] at index j into the merged array arr[] at index k. This effectively merges the remaining elements of the right subarray into the merged array.
+++j;: After copying an element from the right subarray into the merged array, j is incremented to move to the next element in the right subarray.
+++k;: After copying an element into the merged array, k is incremented to move to the next position in the merged array.
+
+delete[] L;
+delete[] R;
+These lines deallocate the dynamically allocated memory for the temporary arrays L[] and R[] using the delete[] operator. This ensures that memory is freed once it is no longer needed, preventing memory leak
+
+void sequentialMergeSort(int arr[], int left, int right): This declares a function named sequentialMergeSort that takes an integer array arr[] and two integer parameters left and right. These parameters represent the indices defining the subarray to be sorted.
+
+if (left < right): This line checks if the current subarray defined by left and right indices contains more than one element. If the condition is true, it means there are at least two elements in the subarray, so it proceeds with the sorting process. If the condition is false, it means the subarray contains zero or one element, which is already sorted, so the function returns without performing any sorting.
+
+int mid = left + (right - left) / 2;: This line calculates the midpoint index mid of the current subarray. It ensures that the subarray is divided into approximately equal halves by taking the average of left and right indices.
+
+        // Sort first and second halves
+        sequentialMergeSort(arr, left, mid);
+        sequentialMergeSort(arr, mid + 1, right);
+These lines recursively call the sequentialMergeSort() function to sort the left and right halves of the current subarray.
+sequentialMergeSort(arr, left, mid); sorts the left half of the subarray from index left to mid.
+sequentialMergeSort(arr, mid + 1, right); sorts the right half of the subarray from index mid + 1 to right.
+
+merge(arr, left, mid, right); merges the subarrays from index left to mid (representing the left half) and from index mid + 1 to right (representing the right half) into a single sorted array.
+
+void parallelMergeSort(int arr[], int left, int right): This declares a function named parallelMergeSort that takes an integer array arr[] and two integer parameters left and right. These parameters represent the indices defining the subarray to be sorted.
+
+if (left < right): This line checks if the current subarray defined by left and right indices contains more than one element. If the condition is true, it means there are at least two elements in the subarray, so it proceeds with the sorting process. If the condition is false, it means the subarray contains zero or one element, which is already sorted, so the function returns without performing any sorting.
+
+int mid = left + (right - left) / 2;: This line calculates the midpoint index mid of the current subarray. It ensures that the subarray is divided into approximately equal halves by taking the average of left and right indices.
+
+#pragma omp parallel sections: This line starts the parallel sections construct, indicating that the enclosed sections of code can be executed concurrently by multiple threads.
+#pragma omp section: This line marks the beginning of a section of code that will be executed by one thread. Inside each section, the parallelMergeSort() function is called recursively to sort either the left or right half of the subarray.
+
+merge(arr, left, mid, right); merges the subarrays from index left to mid (representing the left half) and from index mid + 1 to right (representing the right half) into a single sorted array.
+
+int main() {
+This is the entry point of the program. main() is the function that gets executed when the program is run.
+int n;
+    cout << "Enter the size of the array: ";
+    cin >> n;
+Declares an integer variable n to store the size of the array. Then, it prompts the user to enter the size of the array using cout and reads the input using cin.
+   int* arr = new int[n];
+Dynamically allocates memory for an array of integers of size n. This array will hold the data to be sorted.
+ srand(time(NULL)); // Seed the random number generator
+Uses srand() to seed the random number generator. It's important to seed the random number generator before using rand() to get different random numbers on each program run. time(NULL) is commonly used as a seed because it returns the current time in seconds, ensuring a different seed on each program execution.
+for (int i = 0; i < n; ++i)
+        arr[i] = rand() % 1000; // Generate random numbers between 0 and 999
+Fills the array arr with random integers between 0 and 999 using rand() % 1000.
+
+ clock_t start = clock();
+Starts measuring the time using clock(), which returns the number of clock ticks elapsed since the program started.
+sequentialMergeSort(arr, 0, n - 1);
+Calls the function sequentialMergeSort to sort the array arr sequentially.
+    clock_t stop = clock();
+Stops measuring the time after the sorting process.
+ double sequential_duration = double(stop - start) / CLOCKS_PER_SEC * 1000;
+Calculates the time taken for sequential merge sort in milliseconds.
+ cout << "Time taken for sequential merge sort: " << sequential_duration << " milliseconds" << endl;
+Prints the time taken for sequential merge sort.
+ srand(time(NULL)); // Reseed the random number generator
+Reseeds the random number generator to generate new random numbers for the next sorting.
+   for (int i = 0; i < n; ++i)
+        arr[i] = rand() % 1000; // Generate random numbers between 0 and 999
+Generates new random numbers and fills the array arr again.
+
+    start = clock();
+Starts measuring the time for parallel merge sort.
+  parallelMergeSort(arr, 0, n - 1);
+Calls the function parallelMergeSort to sort the array arr in parallel.
+    stop = clock();
+Stops measuring the time after the sorting process.
+double parallel_duration = double(stop - start) / CLOCKS_PER_SEC * 1000;
+Calculates the time taken for parallel merge sort in milliseconds.
+
+    cout << "Time taken for parallel merge sort: " << parallel_duration << " milliseconds" << endl;
+Prints the time taken for parallel merge sort.
+
+    delete[] arr;
+Frees the dynamically allocated memory to prevent memory leaks.

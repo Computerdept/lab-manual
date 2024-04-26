@@ -1,0 +1,45 @@
+HPC_2a:
+
+#include <iostream>: This line includes the input/output stream library, which provides functionality for input and output operations.
+#include <omp.h>: This line includes the OpenMP library, which enables parallel programming in C and C++.
+
+void bubble(int *, int); and void swap(int &, int &);: These lines are function prototypes. They declare the signatures of the bubble and swap functions. The bubble function is used to perform the bubble sort algorithm, and the swap function is used to swap the values of two integers.
+
+void bubble(int *a, int n) {: This line defines the bubble function, which takes an integer array a and its size n as parameters. This function sorts the array using the bubble sort algorithm.
+ 
+bool swapped;: This line declares a boolean variable swapped, which will be used to track whether any swaps have been made during an iteration of the bubble sort.
+#pragma omp parallel { ... }: This pragma starts a parallel region, indicating that the following code block will be executed by multiple threads in parallel.
+
+for (int i = 0; i < n - 1; i++) {: This line initiates the outer loop of the bubble sort algorithm, which iterates n-1 times.
+swapped = false;: This line initializes the swapped flag to false at the beginning of each iteration of the outer loop.
+#pragma omp for { ... }: This pragma distributes the iterations of the subsequent loop across the available threads in the parallel region.
+
+if (a[j] > a[j + 1]) { ... }: This line checks if the current element is greater than the next element in the array.
+#pragma omp critical { ... }: This pragma creates a critical section, ensuring that only one thread at a time can execute the enclosed code block. Here, it's used to safely swap elements in the array.
+swap(a[j], a[j + 1]);: This line swaps the current element with the next element in the array.
+swapped = true;: This line sets the swapped flag to true if a swap occurred during the iteration.
+#pragma omp barrier: This pragma enforces a synchronization barrier, ensuring that all threads reach this point before proceeding. It's used to synchronize all threads after each iteration of the outer loop.
+if (!swapped) break;: This line checks if no swaps were made during the current iteration. If so, it breaks out of the outer loop, as the array is already sorted.
+
+void swap(int &a, int &b) { ... }: This line defines the swap function, which takes two integer references a and b as parameters and swaps their values.
+
+int main() {: This line defines the main function, which serves as the entry point of the program.
+int *a, n;: This line declares an integer pointer a and an integer n. a will be used to store the dynamically allocated array, and n will store the total number of elements in the array.
+std::cout << "Enter total number of elements: ";: This line prompts the user to enter the total number of elements in the array.
+std::cin >> n;: This line reads the input provided by the user and stores it in the variable n, representing the total number of elements in the array.
+a = new int[n];: This line dynamically allocates memory for an integer array a of size n. The size of the array is determined by the user input.
+std::cout << "Enter elements: ";: This line prompts the user to enter the elements of the array.
+for (int i = 0; i < n; i++) { ... }: This loop iterates over each index of the array a and reads the input provided by the user for each element, storing them in the array.
+bubble(a, n);: This line calls the bubble function, passing the array a and its size n as arguments. It sorts the array using the bubble sort algorithm.
+std::cout << "Sorted array: ";: This line prints a message indicating that the sorted array is about to be displayed.
+for (int i = 0; i < n; i++) { ... }: This loop iterates over each index of the sorted array a and prints the elements one by one.
+std::cout << std::endl;: This line prints a newline character to ensure proper formatting of the output.
+delete[] a;: This line deallocates the dynamically allocated memory for the array a to prevent memory leaks.
+
+
+
+
+
+
+
+

@@ -1,0 +1,77 @@
+HPC_2bmain
+
+#include<stdio.h>This line includes the standard input-output library <stdio.h>, which provides functions like printf() and scanf() for input and output operations.
+
+This line includes the OpenMP library <omp.h>, which allows for parallel programming using directives and library routines.
+
+void merge(int array[],int low,int mid,int high)
+{
+    int temp[30];
+    int i,j,k,m;
+    j=low;
+    m=mid+1;
+This section defines a function named merge which takes an array array[] and three integer parameters low, mid, and high. These parameters represent the indices defining the subarrays to be merged. Inside the function, it declares an integer array temp[] to hold temporary values during the merge process. It also declares integer variables i, j, k, and m to be used as loop counters and indices.
+
+for(i=low; j<=mid && m<=high ; i++): This line starts a loop that iterates over the elements of the subarray defined by the indices low to high. It initializes i to the starting index low of the subarray and continues looping as long as both j is less than or equal to mid (indicating there are still elements in the left subarray) and m is less than or equal to high (indicating there are still elements in the right subarray). It increments i after each iteration.
+if(array[j]<=array[m]): This line checks if the element at index j in the left subarray is less than or equal to the element at index m in the right subarray.
+{ temp[i]=array[j]; j++; }: If the element at index j is less than or equal to the element at index m, it means the element from the left subarray should come first in the merged array. So, the element at index j is copied to the temp array at index i, and then j is incremented to move to the next element in the left subarray.
+else: If the condition in the if statement is not true, it means the element at index m in the right subarray should come first in the merged array.
+{ temp[i]=array[m]; m++; }: In this case, the element at index m is copied to the temp array at index i, and then m is incremented to move to the next element in the right subarray.
+if(j>mid): This line checks if the index j has surpassed the midpoint mid. If j is greater than mid, it means that all elements in the left subarray have been processed, and there are still elements remaining in the right subarray.
+{ for(k=m; k<=high; k++) }: If the condition in the if statement is true, it means that there are remaining elements only in the right subarray. So, this loop iterates over the remaining elements in the right subarray from index m to high. It copies each element from the array[] to the temp[] array at index i, and then increments i to move to the next index in the temp[] array.
+else: If the condition in the if statement is false, it means that there are remaining elements only in the left subarray.
+{ for(k=j; k<=mid; k++) }: In this case, this loop iterates over the remaining elements in the left subarray from index j to mid. Similar to the previous loop, it copies each element from the array[] to the temp[] array at index i, and then increments i to move to the next index in the temp[] array.
+
+    for(k=low; k<=high; k++)
+        array[k]=temp[k];
+}
+This loop copies the sorted elements from the temporary array temp[] back into the original array array[].
+
+void mergesort(int array[],int low,int high)
+{
+    int mid;
+    if(low<high)
+    {
+        mid=(low+high)/2;
+
+This section defines a function named mergesort which takes an array array[] and two integer parameters low and high. These parameters represent the indices defining the subarray to be sorted. Inside the function, it calculates the midpoint mid of the current subarray.
+
+#pragma omp parallel sections num_threads(2): This line is an OpenMP directive that starts a parallel sections construct. It indicates that the following code block should be executed in parallel, and it specifies that there will be two sections of code to execute. The num_threads(2) clause specifies that there will be two threads created to execute these sections.
+#pragma omp section: This line is an OpenMP directive indicating the start of a section of code that will be executed in parallel. It's part of the parallel sections construct. The following block of code until the next #pragma omp section or the end of the parallel sections construct will be executed by one of the threads.
+{ mergesort(array,low,mid); }: This line invokes the mergesort() function recursively on the left half of the array. The low index remains the same, but mid is the midpoint of the current subarray.
+#pragma omp section: This line is another section directive indicating the start of a separate section of code that will be executed in parallel. The following block of code until the next #pragma omp section or the end of the parallel sections construct will be executed by the other thread.
+{ mergesort(array,mid+1,high); }: This line invokes the mergesort() function recursively on the right half of the array. In this case, mid + 1 is used as the starting index, and high remains the same.
+
+    merge(array,low,mid,high);
+After both halves of the array have been sorted recursively, the merge function is called to merge the sorted halves into a single sorted array.
+
+int main(): This is the main function, which serves as the entry point of the program. It has a return type of int, indicating that it returns an integer value.
+int array[50];: This line declares an array named array of integers with a capacity of 50 elements. This array will store the elements entered by the user.
+int i, size;: This line declares two integer variables i and size. i will be used as a loop counter, and size will store the total number of elements to be entered by the user.
+printf("Enter total no. of elements:\n");: This line prints a message prompting the user to enter the total number of elements to be sorted.
+scanf("%d", &size);: This line reads an integer value entered by the user and stores it in the variable size, which represents the total number of elements.
+printf("Enter %d elements:\n", size);: This line prints a message indicating to the user how many elements they should enter.
+for(i = 0; i < size; i++): This line starts a loop that iterates from i = 0 to i = size - 1. It will loop size times, allowing the user to input each element of the array.
+scanf("%d", &array[i]);: Inside the loop, this line reads an integer value entered by the user and stores it in the i-th element of the array.
+
+mergesort(array, 0, size - 1);
+This line invokes the mergesort() function to sort the array. It passes three arguments: the array array[] to be sorted, the starting index 0, and the ending index size - 1. This means the entire array will be sorted, starting from index 0 up to index size - 1.
+
+printf("Sorted Elements as follows:\n");
+This line prints a message indicating that the sorted elements will be displayed next.
+
+for(i = 0; i < size; i++)
+    printf("%d ", array[i]);
+This loop iterates over the sorted array and prints each element to the console. It starts from index 0 and continues until index size - 1. For each iteration, it prints the value of array[i] followed by a space.
+
+
+
+
+
+
+
+
+
+
+
+

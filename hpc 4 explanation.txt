@@ -1,0 +1,96 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <cuda_runtime.h>
+
+These lines include necessary header files. stdio.h is for standard input/output operations, 
+stdlib.h for dynamic memory allocation and other standard functions, and 
+cuda_runtime.h for CUDA runtime API functions.
+
+
+Step 2: Define Constants
+#define N 1000000
+This line defines a constant N which represents the size of the vectors to be added.
+
+
+Step 3: CUDA Kernel Definition
+c
+Copy code
+__global__ void vectorAdd(int *a, int *b, int *c, int n) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        c[i] = a[i] + b[i];
+    }
+}
+This is the CUDA kernel function vectorAdd for performing vector addition on the GPU. 
+It adds corresponding elements of arrays a and b and stores the result in array c. 
+blockDim.x, blockIdx.x, and threadIdx.x are CUDA built-in variables representing 
+the block dimension, block index, and thread index, respectively.
+
+Step 4: Main Function
+c
+Copy code
+int main() {
+    // Host vectors
+    int *h_a, *h_b, *h_c;
+    // Device vectors
+    int *d_a, *d_b, *d_c;
+    // Vector size
+    int size = N * sizeof(int);
+    // Allocate memory for host vectors
+    h_a = (int *)malloc(size);
+    h_b = (int *)malloc(size);
+    h_c = (int *)malloc(size);
+    // Initialize host vectors
+    for (int i = 0; i < N; ++i) {
+        h_a[i] = i;
+        h_b[i] = i * 2;
+    }
+    // Allocate memory for device vectors
+    cudaMalloc((void **)&d_a, size);
+    cudaMalloc((void **)&d_b, size);
+    cudaMalloc((void **)&d_c, size);
+    // Copy host vectors to device
+    cudaMemcpy(d_a, h_a, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, h_b, size, cudaMemcpyHostToDevice);
+    // Define grid and block size
+    dim3 dimGrid(ceil(N / 256.0), 1, 1);
+    dim3 dimBlock(256, 1, 1);
+    // Launch vectorAdd kernel on GPU
+    vectorAdd<<<dimGrid, dimBlock>>>(d_a, d_b, d_c, N);
+    // Copy result from device to host
+    cudaMemcpy(h_c, d_c, size, cudaMemcpyDeviceToHost);
+    // Verify the result
+    for (int i = 0; i < 10; ++i) {
+        printf("%d + %d = %d\n", h_a[i], h_b[i], h_a[i] + h_b[i]);
+    }
+    // Free device memory
+    cudaFree(d_a);
+    cudaFree(d_b);
+    cudaFree(d_c);
+    // Free host memory
+    free(h_a);
+    free(h_b);
+    free(h_c);
+    return 0;
+}
+
+
+Memory Allocation: Host vectors h_a, h_b, and h_c are allocated memory using malloc() to store the input vectors and the result vector.
+
+Initialization: The input vectors h_a and h_b are initialized with sequential values.
+
+Device Memory Allocation: Device vectors d_a, d_b, and d_c are allocated memory using cudaMalloc() to store the vectors on the GPU.
+
+Data Transfer: The input vectors h_a and h_b are copied from the host to the device using cudaMemcpy().
+
+Grid and Block Dimension Setup: Grid and block dimensions are set up to determine how the CUDA threads are organized for execution on the GPU.
+
+Kernel Launch: The vectorAdd kernel is launched on the GPU with the specified grid and block dimensions.
+
+Result Retrieval: The result vector d_c is copied from the device to the host using cudaMemcpy().
+
+Verification and Output: The first 10 elements of the result are printed to verify the correctness of the addition.
+
+Memory Deallocation: Memory allocated on both the host and device is freed before exiting the program.
+
+This program demonstrates the entire process of performing vector addition on the GPU using CUDA, from memory allocation to kernel launch and result retrieval.
